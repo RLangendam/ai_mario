@@ -56,7 +56,8 @@ class keyboard_control {
                      return ip;
                    });
 
-    SendInput(ips.size(), ips.data(), sizeof(INPUT));
+    SendInput(static_cast<UINT>(ips.size()), ips.data(),
+              static_cast<int>(sizeof(INPUT)));
   }
 
   void keys_up(std::list<WORD> keys) {
@@ -74,7 +75,8 @@ class keyboard_control {
                      return ip;
                    });
 
-    SendInput(ips.size(), ips.data(), sizeof(INPUT));
+    SendInput(static_cast<UINT>(ips.size()), ips.data(),
+              static_cast<int>(sizeof(INPUT)));
   }
 
   std::unordered_map<WORD, std::chrono::time_point<std::chrono::steady_clock>>
