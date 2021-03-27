@@ -1,12 +1,8 @@
-#include "tensorflow_test.hpp"
+#include "tensorflow.hpp"
 
-#pragma warning(push)
-#pragma warning(disable : 4190)
-#include <tensorflow/c/c_api.h>
-#pragma warning(pop)
+#include <catch2/catch.hpp>
 
-#include <iostream>
-
-void tensorflow_test() {
-  std::cout << "Tensorflow version: " << TF_Version() << '\n';
+TEST_CASE("Tensorflow version") {
+  tensorflow tf;
+  CHECK(tf.get_version() == "2.4.0");
 }

@@ -58,14 +58,14 @@ add_library(
   "keyboard_facade.hpp"
   "keyboard_facade_implementation.hpp"
   "keyboard_facade_implementation.cpp"
-  "tensorflow_test.hpp"
-  "tensorflow_test.cpp"
+  "tensorflow.hpp"
+  "tensorflow.cpp"
   "time_oracle.hpp"
   "time_oracle_implementation.hpp"
   "time_oracle_implementation.cpp")
 
 add_executable(ai_mario_tests "test_main.cpp" "game_test.cpp"
-                              "keyboard_control_test.cpp")
+                              "keyboard_control_test.cpp" "tensorflow_test.cpp")
 
 target_include_directories(ai_mario_lib PRIVATE ${TENSORFLOW_DIR}/include)
 target_link_directories(ai_mario PRIVATE ${TENSORFLOW_DIR}/lib)
