@@ -4,36 +4,47 @@
 #include <strsafe.h>
 #include <tlhelp32.h>
 
-namespace {
-void print_error(LPCTSTR lpszFunction) {
-  LPVOID lpMsgBuf;
-  LPVOID lpDisplayBuf;
-  DWORD dw = GetLastError();
-
-  FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-                    FORMAT_MESSAGE_IGNORE_INSERTS,
-                NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPTSTR)&lpMsgBuf, 0, NULL);
-
-  lpDisplayBuf = (LPVOID)LocalAlloc(
-      LMEM_ZEROINIT,
-      (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) *
-          sizeof(TCHAR));
-  StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-                  TEXT("%s failed with error %d: %s"), lpszFunction, dw,
-                  lpMsgBuf);
-  MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
-
-  LocalFree(lpMsgBuf);
-  LocalFree(lpDisplayBuf);
-}
-
-}  // namespace
+#include "print_error.hpp"
 
 namespace detail {
 class game_facade_impl {
  public:
   explicit game_facade_impl(char const* name) : name{name} {}
+
+  static void startup(char* application_name, char* rom_name) {
+     
+    // additional information
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    // set the size of the structures
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    // start the program
+    auto status = CreateProcess((LPCTSTR)application_name,  // the path
+                                (LPSTR)rom_name,          // Command line
+                                NULL,   // Process handle not inheritable
+                                NULL,   // Thread handle not inheritable
+                                FALSE,  // Set handle inheritance to FALSE
+                                0,      // No creation flags
+                                NULL,   // Use parent's environment block
+                                NULL,   // Use parent's starting directory
+                                &si,    // Pointer to STARTUPINFO structure
+                                &pi  // Pointer to PROCESS_INFORMATION structure
+                                     // (removed extra parentheses)
+    );
+
+    if (status == FALSE) {
+      print_error(L"ReadProcessMemory");
+    }
+
+    // todo: move to destructor
+    // Close process and thread handles.
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+  }
 
   static DWORD get_pid(HWND hWnd) {
     DWORD pid;
@@ -45,7 +56,7 @@ class game_facade_impl {
     HANDLE hSnapshot = CreateToolhelp32Snapshot(
         TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, dwProcID);
     if (hSnapshot == INVALID_HANDLE_VALUE) {
-      print_error(TEXT("CreateToolhelp32Snapshot"));
+      print_error(L"CreateToolhelp32Snapshot");
     } else {
       MODULEENTRY32 ModuleEntry32;
       ModuleEntry32.dwSize = sizeof(MODULEENTRY32);
@@ -65,7 +76,7 @@ class game_facade_impl {
     ReadProcessMemory(pHandle, (LPCVOID)where, &result, sizeof(result),
                       &bytes_read);
     if (bytes_read != sizeof(result)) {
-      print_error(TEXT("ReadProcessMemory"));
+      print_error(L"ReadProcessMemory");
     }
     return result;
   }
@@ -92,7 +103,7 @@ void game_facade_implementation::read_screen(screen_buffer& buffer) const {
                                 static_cast<uintptr_t>(offset::screen_begin)),
       buffer.data(), buffer.size(), &bytes_read);
   if (bytes_read != buffer.size()) {
-    print_error(TEXT("ReadProcessMemory"));
+    print_error(L"ReadProcessMemory");
   }
 }
 

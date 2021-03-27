@@ -28,7 +28,9 @@ add_library(
   "keyboard_facade_implementation.cpp"
   "time_oracle.hpp"
   "time_oracle_implementation.hpp"
-  "time_oracle_implementation.cpp")
+  "time_oracle_implementation.cpp"
+  "print_error.hpp"
+  "print_error.cpp")
 
 add_executable(ai_mario_tests "test_main.cpp" "game_test.cpp"
                               "keyboard_control_test.cpp")
