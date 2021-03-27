@@ -7,12 +7,25 @@
 #include "print_error.hpp"
 
 namespace detail {
+class process_information {
+ public:
+  explicit process_information(PROCESS_INFORMATION process_information)
+      : info{process_information} {}
+
+  ~process_information() {
+    CloseHandle(info.hProcess);
+    CloseHandle(info.hThread);
+  }
+
+  PROCESS_INFORMATION info;
+};
 class game_facade_impl {
  public:
-  explicit game_facade_impl(char const* name) : name{name} {}
+  explicit game_facade_impl(char const* application_name, char const* rom_name)
+      : application_name{application_name}, rom_name{rom_name} {}
 
-  static void startup(char* application_name, char* rom_name) {
-     
+  static process_information startup(char const* application_name,
+                                     char const* rom_name) {
     // additional information
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
@@ -24,7 +37,7 @@ class game_facade_impl {
 
     // start the program
     auto status = CreateProcess((LPCTSTR)application_name,  // the path
-                                (LPSTR)rom_name,          // Command line
+                                (LPSTR)rom_name,            // Command line
                                 NULL,   // Process handle not inheritable
                                 NULL,   // Thread handle not inheritable
                                 FALSE,  // Set handle inheritance to FALSE
@@ -40,17 +53,9 @@ class game_facade_impl {
       print_error(L"ReadProcessMemory");
     }
 
-    // todo: move to destructor
-    // Close process and thread handles.
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+    return process_information{pi};
   }
 
-  static DWORD get_pid(HWND hWnd) {
-    DWORD pid;
-    GetWindowThreadProcessId(hWnd, &pid);
-    return pid;
-  }
   static uintptr_t get_single_module_base_address(DWORD dwProcID) {
     uintptr_t ModuleBaseAddress = 0;
     HANDLE hSnapshot = CreateToolhelp32Snapshot(
@@ -81,17 +86,19 @@ class game_facade_impl {
     return result;
   }
 
-  char const* name;
-  HWND hWnd{FindWindowA(0, name)};
-  DWORD pid{get_pid(hWnd)};
-  HANDLE pHandle{OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid)};
+  char const* application_name;
+  char const* rom_name;
+  process_information my_process_information{startup(application_name, rom_name)};
+  HANDLE pHandle{my_process_information.info.hProcess};
   uintptr_t start_of_rom{
-      read<uintptr_t>(get_single_module_base_address(pid) + 0x22B204)};
+      read<uintptr_t>(get_single_module_base_address(my_process_information.info.dwProcessId) + 0x22B204)};
 };
 }  // namespace detail
 
-game_facade_implementation::game_facade_implementation(char const* name)
-    : impl{std::make_unique<detail::game_facade_impl>(name)} {}
+game_facade_implementation::game_facade_implementation(
+    char const* application_name, char const* rom_name)
+    : impl{std::make_unique<detail::game_facade_impl>(application_name,
+                                                      rom_name)} {}
 
 game_facade_implementation::~game_facade_implementation() = default;
 

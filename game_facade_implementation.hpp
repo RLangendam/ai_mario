@@ -5,12 +5,14 @@
 #include "game_facade.hpp"
 
 namespace detail {
-    class game_facade_impl;
-}
+class process_information;
+class game_facade_impl;
+}  // namespace detail
 
 class game_facade_implementation : public game_facade {
  public:
-  explicit game_facade_implementation(char const* name);
+  explicit game_facade_implementation(char const* application_name,
+                                      char const* rom_name);
   virtual ~game_facade_implementation() override;
 
  private:
