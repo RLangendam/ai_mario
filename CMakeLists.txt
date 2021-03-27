@@ -54,17 +54,18 @@ download_extract_file(
   d233bb8fad7be392152b23d64aa13f6d03e37e20
   ${TENSORFLOW_DIR})
 
+set(VISUALBOY_DIR ${CMAKE_CURRENT_LIST_DIR}/visualboy)
+
 download_extract_file(
   https://sites.google.com/site/nosurveyemus/the-gameboy-page/VisualBoyAdvance-1.8.0-beta3.zip
   VisualBoyAdvance-1.8.0-beta3.zip
   SHA1
   83ffeebd6fbebf6b5761444d37bb8694a2829d45
-  ${CMAKE_CURRENT_LIST_DIR}/visualboy)
+  ${VISUALBOY_DIR})
 
 download_file(
   https://sites.google.com/site/nosurveyemus/the-gameboy-page/Mario1.gb
-  Mario1.gb SHA1 418203621b887caa090215d97e3f509b79affd3e
-  ${CMAKE_CURRENT_LIST_DIR}/visualboy)
+  Mario1.gb SHA1 418203621b887caa090215d97e3f509b79affd3e ${VISUALBOY_DIR})
 
 add_executable(ai_mario "main.cpp")
 
@@ -118,6 +119,18 @@ add_custom_command(
   POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
           ${TENSORFLOW_DIR}/lib/tensorflow.dll $<TARGET_FILE_DIR:ai_mario>)
+
+add_custom_command(
+  TARGET ai_mario
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${VISUALBOY_DIR}/Mario1.gb
+          $<TARGET_FILE_DIR:ai_mario>)
+
+add_custom_command(
+  TARGET ai_mario
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          ${VISUALBOY_DIR}/VisualBoyAdvance.exe $<TARGET_FILE_DIR:ai_mario>)
 
 include(CTest)
 include(Catch)
