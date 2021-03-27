@@ -1,5 +1,6 @@
 #include <windows.h>
 
+#include <iostream>
 #include <thread>
 
 #include "game.hpp"
@@ -7,9 +8,13 @@
 #include "keyboard_control.hpp"
 #include "keyboard_facade_implementation.hpp"
 #include "print_error.hpp"
+#include "tensorflow.hpp"
 #include "time_oracle_implementation.hpp"
 
 int main() {
+  tensorflow tf;
+  std::cout << "Tensorflow version: " << tf.get_version() << '\n';
+
   using namespace std::chrono_literals;
 
   startup("D:\\gameboy\\VisualBoyAdvance.exe", "VisualBoyAdvance.exe D:\\gameboy\\mario1.gb");

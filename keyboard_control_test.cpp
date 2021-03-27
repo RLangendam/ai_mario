@@ -10,14 +10,6 @@
 #include "keyboard_control.hpp"
 #include "time_oracle.hpp"
 
-template <typename T>
-std::ostream& operator<<(std::ostream& stream, std::list<T> const& range) {
-  for (auto const& element : range) {
-    stream << element << ", ";
-  }
-  return stream;
-}
-
 SCENARIO(
     "keyboard_control should hold a single key during a given time frame") {
   using namespace fakeit;
