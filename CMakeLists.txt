@@ -30,7 +30,8 @@ add_library(
   "time_oracle_implementation.hpp"
   "time_oracle_implementation.cpp")
 
-add_executable(ai_mario_tests "test_main.cpp" "game_test.cpp" "keyboard_control_test.cpp")
+add_executable(ai_mario_tests "test_main.cpp" "game_test.cpp"
+                              "keyboard_control_test.cpp")
 
 target_link_libraries(ai_mario ai_mario_lib)
 target_link_libraries(ai_mario_tests Catch2::Catch2 FakeIt::FakeIt ai_mario_lib)
