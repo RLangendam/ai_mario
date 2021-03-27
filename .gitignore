@@ -67,3 +67,4 @@ CMakeUserPresets.json
 /.vs/
 /.vscode/
 /tensorflow/
+/visualboy/

@@ -11,14 +11,25 @@ function(download_extract_file url filename hash_type hash dir)
   if(NOT EXISTS ${dir}/${filename})
     file(
       DOWNLOAD ${url} ${dir}/${filename}
-      TIMEOUT 60 # seconds
+      TIMEOUT 60
       EXPECTED_HASH ${hash_type}=${hash}
       TLS_VERIFY ON)
-
     file(ARCHIVE_EXTRACT INPUT ${dir}/${filename} DESTINATION ${dir})
   endif()
 
 endfunction(download_extract_file)
+
+function(download_file url filename hash_type hash dir)
+
+  if(NOT EXISTS ${dir}/${filename})
+    file(
+      DOWNLOAD ${url} ${dir}/${filename}
+      TIMEOUT 60
+      EXPECTED_HASH ${hash_type}=${hash}
+      TLS_VERIFY ON)
+  endif()
+
+endfunction(download_file)
 
 project(ai_mario)
 
@@ -42,6 +53,18 @@ download_extract_file(
   SHA1
   d233bb8fad7be392152b23d64aa13f6d03e37e20
   ${TENSORFLOW_DIR})
+
+download_extract_file(
+  https://sites.google.com/site/nosurveyemus/the-gameboy-page/VisualBoyAdvance-1.8.0-beta3.zip
+  VisualBoyAdvance-1.8.0-beta3.zip
+  SHA1
+  83ffeebd6fbebf6b5761444d37bb8694a2829d45
+  ${CMAKE_CURRENT_LIST_DIR}/visualboy)
+
+download_file(
+  https://sites.google.com/site/nosurveyemus/the-gameboy-page/Mario1.gb
+  Mario1.gb SHA1 418203621b887caa090215d97e3f509b79affd3e
+  ${CMAKE_CURRENT_LIST_DIR}/visualboy)
 
 add_executable(ai_mario "main.cpp")
 
@@ -94,7 +117,7 @@ add_custom_command(
   TARGET ai_mario
   POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-          "${TENSORFLOW_DIR}/lib/tensorflow.dll" $<TARGET_FILE_DIR:ai_mario>)
+          ${TENSORFLOW_DIR}/lib/tensorflow.dll $<TARGET_FILE_DIR:ai_mario>)
 
 include(CTest)
 include(Catch)
