@@ -1,17 +1,18 @@
 #include "keyboard_control.hpp"
 
-keyboard_control::keyboard_control(keyboard_facade& facade) : facade{facade} {}
+keyboard_control::keyboard_control(keyboard_facade& facade, time_oracle& oracle,
+                                   std::chrono::milliseconds const& duration)
+    : facade{facade}, oracle{oracle}, duration{duration} {}
 
 void keyboard_control::press(std::list<unsigned short> keys) {
-  using namespace std::chrono_literals;
   std::list<unsigned short> keys_to_press;
   for (auto key : keys) {
     auto found{presses.find(key)};
     if (found == presses.end()) {
       keys_to_press.emplace_back(key);
-      presses.emplace(key, std::chrono::steady_clock::now() + 100ms);
+      presses.emplace(key, std::chrono::steady_clock::now() + duration);
     } else {
-      found->second = std::chrono::steady_clock::now() + 100ms;
+      found->second = std::chrono::steady_clock::now() + duration;
     }
   }
   facade.keys_down(keys_to_press);

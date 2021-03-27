@@ -4,7 +4,7 @@
 #include "game_facade_implementation.hpp"
 #include "keyboard_control.hpp"
 #include "keyboard_facade_implementation.hpp"
-#include "offset.hpp"
+#include "time_oracle_implementation.hpp"
 
 int main() {
   using namespace std::chrono_literals;
@@ -16,7 +16,8 @@ int main() {
   std::this_thread::sleep_for(5s);
 
   keyboard_facade_implementation keyboard_facade;
-  keyboard_control keyboard{keyboard_facade};
+  time_oracle_implementation oracle;
+  keyboard_control keyboard{keyboard_facade, oracle, 100ms};
   keyboard.press({'Q'});
   while (true) {
     keyboard.update();
