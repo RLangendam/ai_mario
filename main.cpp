@@ -4,9 +4,11 @@
 #include "game_facade_implementation.hpp"
 #include "keyboard_control.hpp"
 #include "keyboard_facade_implementation.hpp"
+#include "tensorflow_test.hpp"
 #include "time_oracle_implementation.hpp"
 
 int main() {
+  tensorflow_test();
   using namespace std::chrono_literals;
 
   game_facade_implementation game_facade{"VisualBoyAdvance"};
