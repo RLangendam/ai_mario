@@ -1,5 +1,3 @@
-#include <windows.h>
-
 #include <iostream>
 #include <thread>
 
@@ -17,9 +15,7 @@ int main() {
 
   using namespace std::chrono_literals;
 
-  startup("D:\\gameboy\\VisualBoyAdvance.exe", "VisualBoyAdvance.exe D:\\gameboy\\mario1.gb");
-  
-  game_facade_implementation game_facade{"VisualBoyAdvance"};
+  game_facade_implementation game_facade{"VisualBoyAdvance.exe", "VisualBoyAdvance.exe mario1.gb"};
   game g{game_facade};
 
   g.run();
