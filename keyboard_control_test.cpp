@@ -24,9 +24,25 @@ SCENARIO("keyboard_control should hold keys for given time frames") {
       .Return(present + 10ms)
       .Return(present + 20ms);
 
-  keyboard_control keyboard{facade.get(), oracle.get(), 20ms};
 
-  //keyboard.press({'A'});
+  When(Method(facade, keys_down)).AlwaysReturn();
+  When(Method(facade, keys_up)).AlwaysReturn();
 
+  keyboard_control keyboard{facade.get(), oracle.get(), 10ms};
 
+  std::list<unsigned short> keys_to_press{'A'};
+  keyboard.press(keys_to_press);
+
+  Verify(Method(facade, keys_down).Using(keys_to_press)).Once();
+  Verify(Method(facade, keys_up)).Never();
+
+  keyboard.update();
+
+  Verify(Method(facade, keys_down)).Once();
+  Verify(Method(facade, keys_up)).Never();
+
+  keyboard.update();
+
+  Verify(Method(facade, keys_down)).Once();
+  Verify(Method(facade, keys_up).Using(keys_to_press)).Once();
 }

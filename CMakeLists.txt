@@ -35,8 +35,8 @@ add_executable(ai_mario_tests "test_main.cpp" "game_test.cpp" "keyboard_control_
 target_link_libraries(ai_mario ai_mario_lib)
 target_link_libraries(ai_mario_tests Catch2::Catch2 FakeIt::FakeIt ai_mario_lib)
 
-target_compile_features(ai_mario_lib PRIVATE cxx_std_20)
-target_compile_features(ai_mario PRIVATE cxx_std_20)
+target_compile_features(ai_mario_lib PRIVATE cxx_std_17)
+target_compile_features(ai_mario PRIVATE cxx_std_17)
 target_compile_features(ai_mario_tests PRIVATE cxx_std_14)
 
 if(MSVC)
