@@ -18,8 +18,8 @@ void print_error(const wchar_t* lpszFunction) {
       (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) *
           sizeof(TCHAR));
   StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-                  TEXT("%s failed with error %d: %s"), lpszFunction, dw,
-                  lpMsgBuf);
+                  TEXT("%s failed with error %d: %s"), (LPCTSTR)lpszFunction,
+                  dw, lpMsgBuf);
   MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
 
   LocalFree(lpMsgBuf);

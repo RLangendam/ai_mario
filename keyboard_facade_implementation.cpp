@@ -6,8 +6,18 @@
 #include <iterator>
 #include <vector>
 
-void keyboard_facade_implementation::keys_down(
-    std::list<unsigned short> keys) {
+#include "print_error.hpp"
+
+keyboard_facade_implementation::keyboard_facade_implementation(
+    std::shared_ptr<window_handle>&& handle)
+    : handle{std::move(handle)} {
+  auto const result{SetForegroundWindow(this->handle->get())};
+  if (!result) {
+    print_error(L"SetForegroundWindow");
+  }
+}
+
+void keyboard_facade_implementation::keys_down(std::list<unsigned short> keys) {
   std::vector<INPUT> ips;
   ips.reserve(keys.size());
   std::transform(keys.begin(), keys.end(), std::back_inserter(ips),
@@ -24,10 +34,16 @@ void keyboard_facade_implementation::keys_down(
 
   SendInput(static_cast<UINT>(ips.size()), ips.data(),
             static_cast<int>(sizeof(INPUT)));
+
+  // for (auto key : keys) {
+  //   auto result = PostMessage(handle->get(), WM_KEYDOWN, key, 0);
+  //   if (result) {
+  //     print_error(L"SendMessage");
+  //   }
+  // }
 }
 
-void keyboard_facade_implementation::keys_up(
-    std::list<unsigned short> keys) {
+void keyboard_facade_implementation::keys_up(std::list<unsigned short> keys) {
   std::vector<INPUT> ips;
   ips.reserve(keys.size());
   std::transform(keys.begin(), keys.end(), std::back_inserter(ips),
@@ -44,4 +60,11 @@ void keyboard_facade_implementation::keys_up(
 
   SendInput(static_cast<UINT>(ips.size()), ips.data(),
             static_cast<int>(sizeof(INPUT)));
+
+  // for (auto key : keys) {
+  //   auto result = PostMessage(handle->get(), WM_KEYUP, key, 0);
+  //   if (result) {
+  //     print_error(L"SendMessage");
+  //   }
+  // }
 }

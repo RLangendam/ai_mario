@@ -84,6 +84,8 @@ add_library(
   "keyboard_facade_implementation.cpp"
   "tensorflow.hpp"
   "tensorflow.cpp"
+  "window_handle.hpp"
+  "window_handle.cpp"
   "time_oracle.hpp"
   "time_oracle_implementation.hpp"
   "time_oracle_implementation.cpp"

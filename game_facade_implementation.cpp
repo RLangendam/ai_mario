@@ -1,9 +1,10 @@
 #include "game_facade_implementation.hpp"
 
 #include <Windows.h>
-#include <thread>
 #include <strsafe.h>
 #include <tlhelp32.h>
+
+#include <thread>
 
 #include "print_error.hpp"
 
@@ -18,12 +19,49 @@ class process_information {
     CloseHandle(info.hThread);
   }
 
+  using map_type = std::unordered_map<DWORD, std::pair<HWND, DWORD>>;
+
+  static BOOL CALLBACK each_window(_In_ HWND hwnd, _In_ LPARAM lParam) {
+    map_type* map{reinterpret_cast<map_type*>(lParam)};
+    DWORD process;
+    auto const thread_id{GetWindowThreadProcessId(hwnd, &process)};
+    map->emplace(process, std::make_pair(hwnd, thread_id));
+    return TRUE;
+  }
+
+  static std::shared_ptr<window_handle> get_window_handle(
+      PROCESS_INFORMATION const& info) {
+    using namespace std::chrono_literals;
+    std::shared_ptr<window_handle> result;
+    while (!result) {
+      std::this_thread::sleep_for(100ms);
+      map_type association;
+      EnumWindows(&process_information::each_window,
+                  reinterpret_cast<LPARAM>(&association));
+
+      auto const found{association.find(info.dwProcessId)};
+      if (found != association.end()) {
+        result = std::make_shared<window_handle>(found->second.first);
+      }
+    }
+    return result;
+  }
+
   PROCESS_INFORMATION info;
+  std::shared_ptr<window_handle> handle{get_window_handle(info)};
 };
 class game_facade_impl {
  public:
   explicit game_facade_impl(char const* application_name, char const* rom_name)
       : application_name{application_name}, rom_name{rom_name} {}
+
+  ~game_facade_impl() {
+    auto const result{
+        TerminateProcess(my_process_information.info.hProcess, 0)};
+    if (!result) {
+      print_error(L"TerminateProcess");
+    }
+  }
 
   static process_information startup(char const* application_name,
                                      char const* rom_name) {
@@ -59,7 +97,6 @@ class game_facade_impl {
 
     return process_information{pi};
   }
-
   static uintptr_t get_single_module_base_address(DWORD dwProcID) {
     uintptr_t ModuleBaseAddress = 0;
     HANDLE hSnapshot = CreateToolhelp32Snapshot(
@@ -122,4 +159,8 @@ void game_facade_implementation::read_screen(screen_buffer& buffer) const {
 
 unsigned char game_facade_implementation::read_byte(offset where) const {
   return impl->read<BYTE>(impl->start_of_rom + static_cast<uintptr_t>(where));
+}
+
+std::shared_ptr<window_handle> game_facade_implementation::get_window_handle() {
+  return impl->my_process_information.handle;
 }

@@ -15,9 +15,10 @@ class game_facade_implementation : public game_facade {
                                       char const* rom_name);
   virtual ~game_facade_implementation() override;
 
- private:
   virtual void read_screen(screen_buffer& buffer) const override;
   virtual unsigned char read_byte(offset where) const override;
+  virtual std::shared_ptr<window_handle> get_window_handle() override;
 
+ private:
   std::unique_ptr<detail::game_facade_impl> impl;
 };
