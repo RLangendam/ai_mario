@@ -19,7 +19,7 @@ int main() {
   game g{game_facade};
 
   g.run();
-  // std::this_thread::sleep_for(5s);
+  std::this_thread::sleep_for(5s);
 
   // keyboard_facade_implementation keyboard_facade;
   // time_oracle_implementation oracle;

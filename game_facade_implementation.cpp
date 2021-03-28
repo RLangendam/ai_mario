@@ -1,6 +1,7 @@
 #include "game_facade_implementation.hpp"
 
 #include <Windows.h>
+#include <thread>
 #include <strsafe.h>
 #include <tlhelp32.h>
 
@@ -53,6 +54,9 @@ class game_facade_impl {
       print_error(L"ReadProcessMemory");
     }
 
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(5s);
+
     return process_information{pi};
   }
 
@@ -88,10 +92,12 @@ class game_facade_impl {
 
   char const* application_name;
   char const* rom_name;
-  process_information my_process_information{startup(application_name, rom_name)};
+  process_information my_process_information{
+      startup(application_name, rom_name)};
   HANDLE pHandle{my_process_information.info.hProcess};
-  uintptr_t start_of_rom{
-      read<uintptr_t>(get_single_module_base_address(my_process_information.info.dwProcessId) + 0x22B204)};
+  uintptr_t start_of_rom{read<uintptr_t>(
+      get_single_module_base_address(my_process_information.info.dwProcessId) +
+      0x1a92f8)};
 };
 }  // namespace detail
 
