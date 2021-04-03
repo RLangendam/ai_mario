@@ -240,4 +240,6 @@ Thumbs.db #thumbnail cache on Windows
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm+all
 
-Mario1.gb*
+/Mario1.gb*
+/SDL2-devel-2.0.10-VC.zip
+/SDL2-2.0.10/

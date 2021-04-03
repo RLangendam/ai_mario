@@ -1,12 +1,25 @@
 import os
 import sys
 import urllib.request
+import zipfile
 
 from pyboy import PyBoy, WindowEvent
 
+
+def download(url, filename):
+    if not os.path.exists(sdl_archive):
+        urllib.request.urlretrieve(url + filename, filename)
+
+
+sdl_archive = "SDL2-devel-2.0.10-VC.zip"
+download("https://www.libsdl.org/release/", sdl_archive)
+
+if not os.path.exists("SDL2-2.0.10"):
+    with zipfile.ZipFile(sdl_archive, 'r') as zip_ref:
+        zip_ref.extractall()
+
 rom = "Mario1.gb"
-if not os.path.exists(rom):
-    urllib.request.urlretrieve("https://sites.google.com/site/nosurveyemus/the-gameboy-page/" + rom, rom)
+download("https://sites.google.com/site/nosurveyemus/the-gameboy-page/", rom)
 
 # Makes us able to import PyBoy from the directory below
 file_path = os.path.dirname(os.path.realpath(__file__))
