@@ -3,8 +3,6 @@ import sys
 import urllib.request
 import zipfile
 
-from pyboy import PyBoy, WindowEvent
-
 
 def download(url, filename):
     if not os.path.exists(sdl_archive):
@@ -24,6 +22,10 @@ download("https://sites.google.com/site/nosurveyemus/the-gameboy-page/", rom)
 # Makes us able to import PyBoy from the directory below
 file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, file_path + "/..")
+
+os.environ["PYSDL2_DLL_PATH"] = os.path.join(file_path, "SDL2-2.0.10/lib/x64");
+
+from pyboy import PyBoy, WindowEvent
 
 quiet = "--quiet" in sys.argv
 pyboy = PyBoy(rom, window_type="headless" if quiet else "SDL2", window_scale=3, debug=not quiet, game_wrapper=True)
