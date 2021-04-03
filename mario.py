@@ -5,7 +5,7 @@ import zipfile
 
 
 def download(url, filename):
-    if not os.path.exists(sdl_archive):
+    if not os.path.exists(filename):
         urllib.request.urlretrieve(url + filename, filename)
 
 
