@@ -1,4 +1,6 @@
 import sys
+import numpy
+import tensorflow as tf
 
 from bootstrap import bootstrap
 
@@ -12,7 +14,12 @@ pyboy.set_emulation_speed(0)
 assert pyboy.cartridge_title() == "SUPER MARIOLAN"
 
 mario = pyboy.game_wrapper()
-mario.start_game()
+
+botsupport = pyboy.botsupport_manager()
+
+gym = pyboy.openai_gym()
+
+state = gym.reset()
 
 assert mario.score == 0
 assert mario.lives_left == 2
@@ -23,22 +30,49 @@ last_fitness = 0
 
 print(mario)
 
-pyboy.send_input(WindowEvent.PRESS_ARROW_RIGHT)
-for _ in range(1000):
-    assert mario.fitness >= last_fitness
-    last_fitness = mario.fitness
 
-    pyboy.tick()
-    if mario.lives_left == 1:
-        assert last_fitness == 27700
-        assert mario.fitness == 17700  # Loosing a live, means 10.000 points in this fitness scoring
-        print(mario)
-        break
-else:
-    print("Mario didn't die?")
-    exit(2)
+def to_simple_value(n):
+    if n == 144:
+        return -1
+    elif n < 100:
+        return 2
+    elif n > 350:
+        return 1
+    else:
+        return 0
+
+
+def create_model(_):
+    return (tf.keras.models.Sequential([
+        tf.keras.layers.Dense(320, activation='relu', input_shape=(320,), kernel_initializer='random_normal'),
+        # tf.keras.layers.Dense(100, activation='relu', input_shape=(320,), kernel_initializer='random_normal'),
+        tf.keras.layers.Dense(2, activation='relu', input_shape=(320,), kernel_initializer='random_normal')
+    ]), 0)
+
+
+models = map(create_model, range(10))
+
+
+# print(model.summary())
+
+
+def screen_to_action(model, screen):
+    flattened = numpy.atleast_2d(screen.flatten())
+    predictions = model.predict(flattened)
+    max = numpy.argmax(predictions)
+    return WindowEvent.PRESS_BUTTON_A if max == 0 else WindowEvent.PRESS_ARROW_RIGHT
+
+
+state, reward, done, info = gym.step(WindowEvent.PRESS_ARROW_RIGHT)
+for model, fitness in models:
+    gym.reset()
+    for _ in range(1000):
+        state, reward, done, info = gym.step(
+            screen_to_action(model, numpy.array(list(map(lambda l: list(map(to_simple_value, l)), state)))))
+    fitness = mario.fitness
 
 mario.reset_game()
 assert mario.lives_left == 2
 
+# time.sleep(10)
 pyboy.stop()
