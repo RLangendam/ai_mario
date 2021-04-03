@@ -1,21 +1,19 @@
 import os
 import sys
+import urllib.request
 
 from pyboy import PyBoy, WindowEvent
+
+rom = "Mario1.gb"
+if not os.path.exists(rom):
+    urllib.request.urlretrieve("https://sites.google.com/site/nosurveyemus/the-gameboy-page/" + rom, rom)
 
 # Makes us able to import PyBoy from the directory below
 file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, file_path + "/..")
 
-# Check if the ROM is given through argv
-if len(sys.argv) > 1:
-    filename = sys.argv[1]
-else:
-    print("Usage: python mario_boiler_plate.py [ROM file]")
-    exit(1)
-
 quiet = "--quiet" in sys.argv
-pyboy = PyBoy(filename, window_type="headless" if quiet else "SDL2", window_scale=3, debug=not quiet, game_wrapper=True)
+pyboy = PyBoy(rom, window_type="headless" if quiet else "SDL2", window_scale=3, debug=not quiet, game_wrapper=True)
 pyboy.set_emulation_speed(0)
 assert pyboy.cartridge_title() == "SUPER MARIOLAN"
 
