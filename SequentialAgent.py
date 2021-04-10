@@ -2,12 +2,13 @@ import random
 
 import numpy as np
 import tensorflow as tf
+import random
 
 from RandomAgent import RandomAgent
 
 
 class SequentialAgent(RandomAgent):
-    def __init__(self, _):
+    def __init__(self, layers):
         super().__init__()
         self.build_model()
 

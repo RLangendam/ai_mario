@@ -14,33 +14,32 @@ class AiMario:
         self.pyboy = PyBoy(rom, window_type="headless" if quiet else "SDL2", window_scale=3, debug=not quiet,
                            game_wrapper=True)
 
-    def screen_to_action(self, model, screen):
-        flattened = numpy.atleast_2d(screen.flatten())
-        predictions = model.predict(flattened)
-        max = numpy.argmax(predictions)
-        return self.WindowEvent.PRESS_BUTTON_A if max == 0 else self.WindowEvent.PRESS_ARROW_RIGHT
+    def get_weight_bias_init(self):
+        return [{"weights": np.random.rand(320, 50), "biases": np.random.rand(50)},
+                {"weights": np.random.rand(50, 3), "biases": np.random.rand(3)}]
 
     def run(self):
         self.pyboy.set_emulation_speed(0)
         assert self.pyboy.cartridge_title() == "SUPER MARIOLAN"
 
         mario = self.pyboy.game_wrapper()
+        gym = self.pyboy.openai_gym(
+            observation_type="minimal", action_type="toggle", simultaneous_actions=False)
 
-        # botsupport = self.pyboy.botsupport_manager()
+        mario_algorithm = EvolutionaryAlgorithm()
+        mario_algorithm.run(agent=lambda _: SequentialAgent(self.get_weight_bias_init()), gym=gym)
 
-        gym = self.pyboy.openai_gym(observation_type="minimal", action_type="toggle", simultaneous_actions=False)
-
-        agents = map(SequentialAgent, range(1))
-
-        for agent in agents:
-            state = gym.reset()
-            for _ in range(1000):
-                state, reward, done, info = gym.step(agent.get_action(state))
-
-        print(list(agents))
-
-        mario.reset_game()
-        assert mario.lives_left == 2
+        # population_size = 10
+        #
+        # weights_biases_init = [self.get_weight_bias_init() for _ in range(population_size)]
+        #
+        # agents = list(map(SequentialAgent, **weights_biases_init))
+        #
+        # for agent in agents:
+        #     state = gym.reset()
+        #     for _ in range(100):
+        #         state, reward, done, info = gym.step(agent.get_action(state.reshape(1, 320)))
+        #     agent.fitness = mario.fitness
 
         # time.sleep(10)
         self.pyboy.stop()
