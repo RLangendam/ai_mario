@@ -40,10 +40,9 @@ class EvolutionaryAlgorithm:
         print(self.average_fitness)
 
     def recombine(self, population, size):
-        new_population = []
+        new_population = population
 
         if len(population) % 2 == 1:
-            new_population.append(population[0])
             population = population[1:]
 
         def recombine_tensor(tensors):
