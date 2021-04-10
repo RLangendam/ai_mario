@@ -1,11 +1,8 @@
 import sys
-import numpy
-import tensorflow as tf
-
-from bootstrap import rom, WindowEvent, PyBoy
+import numpy as np
+from bootstrap import rom, PyBoy
 from SequentialAgent import SequentialAgent
-from RandomAgent import RandomAgent
-
+from EvolutionaryAlgorithm import EvolutionaryAlgorithm
 
 
 class AiMario:
