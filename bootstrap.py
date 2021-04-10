@@ -24,4 +24,7 @@ def bootstrap():
     sys.path.insert(0, file_path + "/..")
 
     os.environ["PYSDL2_DLL_PATH"] = os.path.join(file_path, "SDL2-2.0.10/lib/x64")
-    return rom
+
+    from pyboy import PyBoy, WindowEvent
+
+    return rom, PyBoy, WindowEvent
