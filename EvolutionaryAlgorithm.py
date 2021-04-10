@@ -10,7 +10,7 @@ class EvolutionaryAlgorithm:
     def initialize_population(self, agent, size):
         return list(map(agent, range(size)))
 
-    def run(self, agent, gym, size=10, generation_count=10, selection_factor=0.5, agent_timeout=10000):
+    def run(self, agent, gym, size=10, generation_count=10, selection_factor=0.5, agent_timeout=1000):
         population = self.initialize_population(agent, size)
         for generation in range(generation_count):
             fitnesses = list(map(self.compute_fitness(gym, agent_timeout), population))
@@ -25,7 +25,7 @@ class EvolutionaryAlgorithm:
             state = gym.reset()
             for _ in range(agent_timeout):
                 state, reward, done, info = gym.step(agent.get_action(state.reshape(1, 320)))
-                if done:
+                if done or gym.game_wrapper.lives_left < 2:
                     break
             return gym.game_wrapper.fitness
 
