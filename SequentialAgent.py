@@ -3,6 +3,7 @@ import tensorflow as tf
 import random
 
 from RandomAgent import RandomAgent
+from StateTransform import transform_state
 
 
 class SequentialAgent(RandomAgent):
@@ -14,7 +15,7 @@ class SequentialAgent(RandomAgent):
 
     def build_model(self, layers):
         self.model.add(tf.keras.layers.Dense(50,
-                                             input_shape=(320,),
+                                             input_shape=(64,),
                                              activation="relu",
                                              kernel_initializer=tf.constant_initializer(layers[0]['weights']),
                                              bias_initializer=tf.constant_initializer(layers[0]['biases'])))
@@ -34,5 +35,5 @@ class SequentialAgent(RandomAgent):
         return self.model(state)
 
     def get_action(self, state):
-        action_prediction = self.get_action_prediction(state)
+        action_prediction = self.get_action_prediction(transform_state(state))
         return self.actions[np.argmax(action_prediction)]

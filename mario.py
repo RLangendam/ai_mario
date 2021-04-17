@@ -12,7 +12,7 @@ class AiMario:
                            game_wrapper=True)
 
     def get_weight_bias_init(self):
-        return [{"weights": np.random.rand(320, 50), "biases": np.random.rand(50)},
+        return [{"weights": np.random.rand(64, 50), "biases": np.random.rand(50)},
                 {"weights": np.random.rand(50, 2), "biases": np.random.rand(2)}]
 
     def run(self):

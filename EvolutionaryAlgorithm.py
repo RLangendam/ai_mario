@@ -2,6 +2,8 @@ import random
 from SequentialAgent import SequentialAgent
 import numpy as np
 
+from StateTransform import MarioNotFoundException
+
 
 class EvolutionaryAlgorithm:
     def __init__(self):
@@ -23,14 +25,16 @@ class EvolutionaryAlgorithm:
             population = self.mutate(population)
         print(self.average_fitness)
 
-
     def compute_fitness(self, gym, agent_timeout):
         def implementation(agent):
             state = gym.reset()
-            for _ in range(agent_timeout):
-                state, reward, done, info = gym.step(agent.get_action(state.reshape(1, 320)))
-                if done or gym.game_wrapper.lives_left < 2:
-                    break
+            try:
+                for _ in range(agent_timeout):
+                    state, reward, done, info = gym.step(agent.get_action(state))
+                    if done or gym.game_wrapper.lives_left < 2:
+                        break
+            except MarioNotFoundException:
+                pass
             return gym.game_wrapper.level_progress
 
         return implementation
