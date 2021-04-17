@@ -1,11 +1,10 @@
 import numpy as np
 import tensorflow as tf
-import random
 
 from RandomAgent import RandomAgent
 from StateTransform import transform_state
 
-first_layer_neuron_count = 64
+first_layer_neuron_count = 128
 
 
 class SequentialAgent(RandomAgent):
