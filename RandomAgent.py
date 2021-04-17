@@ -6,7 +6,11 @@ from bootstrap import WindowEvent
 
 class RandomAgent:
     def __init__(self):
-        self.actions = tf.constant([WindowEvent.PRESS_ARROW_RIGHT, WindowEvent.PRESS_BUTTON_A])
+        self.actions = tf.constant(
+            [WindowEvent.PRESS_ARROW_RIGHT,
+             WindowEvent.RELEASE_ARROW_RIGHT,
+             WindowEvent.PRESS_BUTTON_A,
+             WindowEvent.RELEASE_BUTTON_A])
         self.action_size = len(self.actions)
 
     def get_action(self, state):

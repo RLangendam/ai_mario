@@ -17,10 +17,10 @@ class AiMario:
 
         mario = self.pyboy.game_wrapper()
         gym = self.pyboy.openai_gym(
-            observation_type="minimal", action_type="press", simultaneous_actions=False)
+            observation_type="minimal", action_type="all", simultaneous_actions=False)
 
         mario_algorithm = EvolutionaryAlgorithm()
-        mario_algorithm.run(agent=lambda _: SequentialAgent.create_random_initialized_agent(), gym=gym)
+        mario_algorithm.run(agent=lambda _: SequentialAgent(), gym=gym)
 
         self.pyboy.stop()
 
