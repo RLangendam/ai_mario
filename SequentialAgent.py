@@ -34,11 +34,4 @@ class SequentialAgent(RandomAgent):
         return self.model(state)
 
     def get_action(self, state):
-        action_prediction = self.get_action_prediction(state)
-        action_model = self.actions[np.argmax(action_prediction)]
-        action_random = super().get_action(state)
-        return action_random if random.random() < 0.1 else action_model
-
-
-
-
+        return self.actions[np.argmax(self.get_action_prediction(state))]

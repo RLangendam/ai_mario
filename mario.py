@@ -26,19 +26,6 @@ class AiMario:
         mario_algorithm = EvolutionaryAlgorithm()
         mario_algorithm.run(agent=lambda _: SequentialAgent(self.get_weight_bias_init()), gym=gym)
 
-        # population_size = 10
-        #
-        # weights_biases_init = [self.get_weight_bias_init() for _ in range(population_size)]
-        #
-        # agents = list(map(SequentialAgent, **weights_biases_init))
-        #
-        # for agent in agents:
-        #     state = gym.reset()
-        #     for _ in range(100):
-        #         state, reward, done, info = gym.step(agent.get_action(state.reshape(1, 320)))
-        #     agent.fitness = mario.fitness
-
-        # time.sleep(10)
         self.pyboy.stop()
 
 
