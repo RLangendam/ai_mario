@@ -19,7 +19,7 @@ class SequentialAgent(RandomAgent):
                                              kernel_initializer=tf.constant_initializer(layers[0]['weights']),
                                              bias_initializer=tf.constant_initializer(layers[0]['biases'])))
         self.model.add(tf.keras.layers.Dense(self.action_size,
-                                             activation="softmax",
+                                             activation="sigmoid",
                                              kernel_initializer=tf.constant_initializer(layers[1]['weights']),
                                              bias_initializer=tf.constant_initializer(layers[1]['biases'])))
 
@@ -37,7 +37,8 @@ class SequentialAgent(RandomAgent):
         action_prediction = self.get_action_prediction(state)
         action_model = self.actions[np.argmax(action_prediction)]
         action_random = super().get_action(state)
-        return action_random if random.random() < 0.1 else action_model
+        return action_model
+        # return action_random if random.random() < 0.1 else action_model
 
 
 

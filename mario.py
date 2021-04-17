@@ -13,7 +13,7 @@ class AiMario:
 
     def get_weight_bias_init(self):
         return [{"weights": np.random.rand(320, 50), "biases": np.random.rand(50)},
-                {"weights": np.random.rand(50, 3), "biases": np.random.rand(3)}]
+                {"weights": np.random.rand(50, 2), "biases": np.random.rand(2)}]
 
     def run(self):
         self.pyboy.set_emulation_speed(0)
@@ -21,7 +21,7 @@ class AiMario:
 
         mario = self.pyboy.game_wrapper()
         gym = self.pyboy.openai_gym(
-            observation_type="minimal", action_type="toggle", simultaneous_actions=False)
+            observation_type="minimal", action_type="press", simultaneous_actions=False)
 
         mario_algorithm = EvolutionaryAlgorithm()
         mario_algorithm.run(agent=lambda _: SequentialAgent(self.get_weight_bias_init()), gym=gym)

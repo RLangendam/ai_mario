@@ -1,5 +1,6 @@
 import random
 from SequentialAgent import SequentialAgent
+import numpy as np
 
 
 class EvolutionaryAlgorithm:
@@ -15,11 +16,13 @@ class EvolutionaryAlgorithm:
         population = self.initialize_population(agent, size)
         for generation in range(generation_count):
             fitnesses = list(map(self.compute_fitness(gym, agent_timeout), population))
+            print(np.max(fitnesses))
             self.set_average_fitness(fitnesses)
             population = self.select_fittest(zip(population, fitnesses), selection_factor * size)
             population = self.recombine(population, size, survival_factor)
             population = self.mutate(population)
         print(self.average_fitness)
+
 
     def compute_fitness(self, gym, agent_timeout):
         def implementation(agent):
@@ -28,7 +31,7 @@ class EvolutionaryAlgorithm:
                 state, reward, done, info = gym.step(agent.get_action(state.reshape(1, 320)))
                 if done or gym.game_wrapper.lives_left < 2:
                     break
-            return gym.game_wrapper.fitness
+            return gym.game_wrapper.level_progress
 
         return implementation
 
