@@ -11,10 +11,6 @@ class AiMario:
         self.pyboy = PyBoy(rom, window_type="headless" if quiet else "SDL2", window_scale=3, debug=not quiet,
                            game_wrapper=True)
 
-    def get_weight_bias_init(self):
-        return [{"weights": np.random.rand(64, 50), "biases": np.random.rand(50)},
-                {"weights": np.random.rand(50, 2), "biases": np.random.rand(2)}]
-
     def run(self):
         self.pyboy.set_emulation_speed(0)
         assert self.pyboy.cartridge_title() == "SUPER MARIOLAN"
@@ -24,7 +20,7 @@ class AiMario:
             observation_type="minimal", action_type="press", simultaneous_actions=False)
 
         mario_algorithm = EvolutionaryAlgorithm()
-        mario_algorithm.run(agent=lambda _: SequentialAgent(self.get_weight_bias_init()), gym=gym)
+        mario_algorithm.run(agent=lambda _: SequentialAgent.create_random_initialized_agent(), gym=gym)
 
         self.pyboy.stop()
 
