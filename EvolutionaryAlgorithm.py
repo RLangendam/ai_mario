@@ -15,7 +15,7 @@ class EvolutionaryAlgorithm:
     def initialize_population(agent, size):
         return list(map(agent, range(size)))
 
-    def run(self, agent, gym, size=10, generation_count=10, selection_factor=0.5, agent_timeout=10000,
+    def run(self, agent, gym, size=100, generation_count=10, selection_factor=0.04, agent_timeout=10000,
             survival_factor=0.5):
         population = self.initialize_population(agent, size)
         for generation in range(generation_count):
@@ -39,7 +39,7 @@ class EvolutionaryAlgorithm:
                     if done or gym.game_wrapper.lives_left < 2:
                         break
                     now = time()
-                    if now - snapshot_time > 0.5:
+                    if now - snapshot_time > 0.8:
                         if (state == snapshot_state).all():
                             break
                         else:
@@ -66,7 +66,7 @@ class EvolutionaryAlgorithm:
         new_population = population[:int(len(population) * survival_factor)]
 
         if len(population) % 2 == 1:
-            population = population[1:]
+            population = population[:-1]
 
         def recombine_tensor(tensors):
             if isinstance(tensors[0], np.ndarray):
@@ -74,7 +74,7 @@ class EvolutionaryAlgorithm:
             else:
                 mu = (tensors[0] + tensors[1]) / 2
                 # print(mu)
-                return random.gauss(mu=mu, sigma=max(abs(tensors[0] - mu), 0.1))
+                return random.gauss(mu=mu, sigma=max(abs(tensors[0] - mu), 0.2))
 
         def recombine_layers(layers):
             left_weights, left_biases = layers[0].get_weights()
@@ -86,10 +86,12 @@ class EvolutionaryAlgorithm:
         def recombine_parents(parents):
             return SequentialAgent(list(map(recombine_layers, zip(parents[0].model.layers, parents[1].model.layers))))
 
-        halfway = int(len(population) / 2)
+        def shuffle_list(list_to_shuffle):
+            random.shuffle(list_to_shuffle, random.random)
+            return list_to_shuffle
+
         while len(new_population) < size:
-            new_population.extend(map(recombine_parents, zip(population[:halfway], population[halfway:])))
-            random.shuffle(population)
+            new_population.extend(map(recombine_parents, zip(shuffle_list(population), shuffle_list(population))))
 
         return new_population[:size]
 

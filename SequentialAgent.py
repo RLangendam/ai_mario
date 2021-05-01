@@ -6,7 +6,7 @@ from RandomAgent import RandomAgent
 from StateTransform import transform_state
 
 first_layer_neuron_count = 128
-second_layer_neuron_count = 50
+second_layer_neuron_count = 100
 
 
 class SequentialAgent(RandomAgent):
