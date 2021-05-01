@@ -1,32 +1,28 @@
 import random
-from SequentialAgent import SequentialAgent
 import numpy as np
 from time import time
 from functools import partial
+from statistics import mean, stdev
 
 from StateTransform import MarioNotFoundException
 
 
 class EvolutionaryAlgorithm:
     def __init__(self):
-        self.average_fitness = []
         pass
 
     @staticmethod
     def initialize_population(agent, size):
         return list(map(agent, range(size)))
 
-    def run(self, agent, gym, size=100, generation_count=10, selection_factor=0.04, agent_timeout=10000,
+    def run(self, agent, gym, size=10, generation_count=10, selection_factor=0.4, agent_timeout=10000,
             survival_factor=0.5, sigma=0.2):
         population = self.initialize_population(agent, size)
         for generation in range(generation_count):
             fitnesses = list(map(self.compute_fitness(gym, agent_timeout), population))
-            print(np.max(fitnesses))
-            self.set_average_fitness(fitnesses)
+            print(f'mean={mean(fitnesses)}, stddev={stdev(fitnesses)}, max={np.max(fitnesses)}')
             population = self.select_fittest(zip(population, fitnesses), selection_factor * size)
-            population = self.recombine(population, size, survival_factor, SequentialAgent, sigma)
-            # population = self.mutate(population)
-        print(self.average_fitness)
+            population = self.recombine(population, size, survival_factor, agent, sigma)
 
     @staticmethod
     def compute_fitness(gym, agent_timeout):
@@ -57,10 +53,6 @@ class EvolutionaryAlgorithm:
     def select_fittest(agent_fitnesses, selection):
         return list(
             map(lambda x: x[0], list(sorted(agent_fitnesses, key=lambda x: x[1], reverse=True))[:int(selection)]))
-
-    def set_average_fitness(self, fitnesses):
-        self.average_fitness.append(sum(fitnesses) / len(fitnesses))
-        print(self.average_fitness)
 
     @staticmethod
     def recombine_tensor(sigma, tensors):
