@@ -3,37 +3,50 @@ import numpy as np
 from time import time
 from functools import partial
 from statistics import mean, stdev
+import concurrent.futures
+from itertools import cycle
+from threading import local
 
 from StateTransform import MarioNotFoundException
 
+data = local()
 
 class EvolutionaryAlgorithm:
-    def __init__(self):
+    def __init__(self, gym_factory):
+        self.create_gym = gym_factory
         pass
 
     @staticmethod
     def initialize_population(agent, size):
         return list(map(agent, range(size)))
 
-    def run(self, agent, gyms, size=10, generation_count=10, selection_factor=0.4, agent_timeout=10000,
+    def run(self, agent, size=10, generation_count=10, selection_factor=0.4, agent_timeout=10000,
             survival_factor=0.5, sigma=0.2):
         population = self.initialize_population(agent, size)
-        for generation in range(generation_count):
-            fitnesses = list(map(self.compute_fitness(gyms[0], agent_timeout), population))
-            print(f'mean={mean(fitnesses)}, stddev={stdev(fitnesses)}, max={np.max(fitnesses)}')
-            population = self.select_fittest(zip(population, fitnesses), selection_factor * size)
-            population = self.recombine(population, size, survival_factor, agent, sigma)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            for generation in range(generation_count):
+                future_to_fitness = {executor.submit(self.compute_fitness(), agent, agent_timeout): agent
+                                     for agent in population}
+                agent_to_fitness = []
+                for future in concurrent.futures.as_completed(future_to_fitness):
+                    agent_to_fitness.append((future_to_fitness[future], future.result()))
+                fitnesses = [pair[1] for pair in agent_to_fitness]
+                print(f'mean={mean(fitnesses)}, stddev={stdev(fitnesses)}, max={np.max(fitnesses)}')
+                population = self.select_fittest(agent_to_fitness, selection_factor * size)
+                population = self.recombine(population, size, survival_factor, agent, sigma)
 
-    @staticmethod
-    def compute_fitness(gym, agent_timeout):
-        def implementation(agent):
-            state = gym.reset()
+    def compute_fitness(self):
+        def implementation(agent, agent_timeout):
+            if not hasattr(data, 'gym'):
+                data.gym = self.create_gym()
+
+            state = data.gym.reset()
             snapshot_state = state
             snapshot_time = time()
             try:
                 for _ in range(agent_timeout):
-                    state, reward, done, info = gym.step(agent.get_action(state))
-                    if done or gym.game_wrapper.lives_left < 2:
+                    state, reward, done, info = data.gym.step(agent.get_action(state))
+                    if done or data.gym.game_wrapper.lives_left < 2:
                         break
                     now = time()
                     if now - snapshot_time > 0.8:
@@ -45,8 +58,7 @@ class EvolutionaryAlgorithm:
 
             except MarioNotFoundException:
                 pass
-            return gym.game_wrapper.level_progress
-
+            return data.gym.game_wrapper.level_progress
         return implementation
 
     @staticmethod
