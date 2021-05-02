@@ -1,3 +1,4 @@
+import multiprocessing
 import random
 import numpy as np
 from time import time
@@ -20,12 +21,12 @@ class EvolutionaryAlgorithm:
     def initialize_population(agent, size):
         return list(map(agent, range(size)))
 
-    def run(self, agent, size=10, generation_count=10, selection_factor=0.4, agent_timeout=10000,
-            survival_factor=0.5, sigma=0.2):
+    def run(self, agent, size=100, generation_count=10, selection_factor=0.04, agent_timeout=10000,
+            survival_factor=0.5, sigma=0.005):
         population = self.initialize_population(agent, size)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
             for generation in range(generation_count):
-                future_to_fitness = {executor.submit(self.compute_fitness(), agent, agent_timeout): agent
+                future_to_fitness = {executor.submit(self.compute_fitness, agent, agent_timeout, True): agent
                                      for agent in population}
                 agent_to_fitness = []
                 for future in concurrent.futures.as_completed(future_to_fitness):
@@ -34,32 +35,32 @@ class EvolutionaryAlgorithm:
                 print(f'mean={mean(fitnesses)}, stddev={stdev(fitnesses)}, max={np.max(fitnesses)}')
                 population = self.select_fittest(agent_to_fitness, selection_factor * size)
                 population = self.recombine(population, size, survival_factor, agent, sigma)
+        for _ in range(10):
+            self.compute_fitness(population[0], agent_timeout, False)
 
-    def compute_fitness(self):
-        def implementation(agent, agent_timeout):
-            if not hasattr(data, 'gym'):
-                data.gym = self.create_gym()
+    def compute_fitness(self, agent, agent_timeout, quiet):
+        if not hasattr(data, 'gym'):
+            data.gym = self.create_gym(quiet)
 
-            state = data.gym.reset()
-            snapshot_state = state
-            snapshot_time = time()
-            try:
-                for _ in range(agent_timeout):
-                    state, reward, done, info = data.gym.step(agent.get_action(state))
-                    if done or data.gym.game_wrapper.lives_left < 2:
+        state = data.gym.reset()
+        snapshot_state = state
+        snapshot_time = time()
+        try:
+            for _ in range(agent_timeout):
+                state, reward, done, info = data.gym.step(agent.get_action(state))
+                if done or data.gym.game_wrapper.lives_left < 2:
+                    break
+                now = time()
+                if now - snapshot_time > 0.8:
+                    if (state == snapshot_state).all():
                         break
-                    now = time()
-                    if now - snapshot_time > 0.8:
-                        if (state == snapshot_state).all():
-                            break
-                        else:
-                            snapshot_time = now
-                            snapshot_state = state
+                    else:
+                        snapshot_time = now
+                        snapshot_state = state
 
-            except MarioNotFoundException:
-                pass
-            return data.gym.game_wrapper.level_progress
-        return implementation
+        except MarioNotFoundException:
+            pass
+        return data.gym.game_wrapper.level_progress
 
     @staticmethod
     def select_fittest(agent_fitnesses, selection):

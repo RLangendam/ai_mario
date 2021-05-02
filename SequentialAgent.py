@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
-import random
 
+tf.get_logger().setLevel('ERROR')
 from RandomAgent import RandomAgent
 from StateTransform import transform_state
 
@@ -15,12 +15,6 @@ class SequentialAgent(RandomAgent):
         self.fitness = 0
         self.model = tf.keras.Sequential()
         self.build_model(layers)
-
-    # @staticmethod
-    # def create_random_initialized_agent():
-    #     return SequentialAgent([{"weights": np.random.rand(first_layer_neuron_count, second_layer_neuron_count),
-    #                              "biases": np.random.rand(second_layer_neuron_count)},
-    #                             {"weights": np.random.rand(second_layer_neuron_count, 2), "biases": np.random.rand(2)}])
 
     def build_model(self, layers=None):
         self.model.add(tf.keras.layers.Dense(second_layer_neuron_count,
@@ -50,7 +44,4 @@ class SequentialAgent(RandomAgent):
     def get_action(self, state):
         action_prediction = self.get_action_prediction(transform_state(state).reshape(1, first_layer_neuron_count))
         action_model = self.actions[np.argmax(action_prediction)]
-        # action_random = super().get_action(state)
-        # print(action_prediction)
         return action_model
-        # return action_random if random.random() < 1 else action_model
